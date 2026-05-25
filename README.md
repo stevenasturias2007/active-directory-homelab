@@ -2,6 +2,11 @@
 
 ## Project Overview
 This project demonstrates the deployment, configuration, and security hardening of a corporate-grade Active Directory (AD) environment. Built inside an isolated virtual network, this lab simulates real-world enterprise infrastructure; spanning network routing, automated identity management, centralized policy distribution, and defensive endpoint engineering. 
+## Architectural Blueprint & Objectives
+* **Isolated Core Infrastructure:** Configured an enterprise network topology utilizing VirtualBox internal networks bridged securely via a Windows Server NAT gateway.
+* **Automated Identity Lifecycle:** Engineered and executed custom PowerShell scripts to securely ingest and provision a multi-departmental corporate user directory.
+* **Centralized Domain Management:** Implemented consolidated Group Policy Objects (GPOs) leveraging Item-Level Targeting (ILT) for efficient departmental drive mapping.
+* **Defensive Endpoint Hardening:** Implemented application control via AppLocker policies to prevent untrusted binary execution and malicious software installation.
 ### Software Used
 * Oracle VirtualBox (Virtual Machine) 
    * Other VM Software options include: VMWare Workstation Pro, Microsoft Hyper-V, ProxMox Virtual Environment, etc.
@@ -103,11 +108,6 @@ A successful response returns the domain name, domain SID, and infrastructure de
 
 ---
 
-## Architectural Blueprint & Objectives
-* **Isolated Core Infrastructure:** Configured an enterprise network topology utilizing VirtualBox internal networks bridged securely via a Windows Server NAT gateway.
-* **Automated Identity Lifecycle:** Engineered and executed custom PowerShell scripts to securely ingest and provision a multi-departmental corporate user directory.
-* **Centralized Domain Management:** Implemented consolidated Group Policy Objects (GPOs) leveraging Item-Level Targeting (ILT) for efficient departmental drive mapping.
-* **Defensive Endpoint Hardening:** Implemented application control via AppLocker policies to prevent untrusted binary execution and malicious software installation.
 ## Phase 1: Core Network Infrastructure & Routing
 
 ### 1. What Was Built
@@ -274,8 +274,8 @@ Configured domain-wide account policies to enforce strict password complexity (m
 2. Created individual drive mappings (M, F, S, I, H) corresponding to the Finance, HR, IT, Marketing, and Sales departments.
 3. Utilized **Item-Level Targeting (ILT)** for each drive map to ensure security group membership (e.g., `GG-Finance Users`) is validated at login, ensuring users only receive access to their relevant departmental shares.
 
-![Drive Mapping Implementation](drive-maps.png)
-![Item Level Targeting Implementation](assets/screenshots/item-level-targeting.png)
+![Drive Mapping Implementation](assets/screenshots/drive-maps.png)
+![Item Level Targeting](assets/screenshots/item-level-targeting.png)
 
 #### 📂 Step C: Endpoint Protection & Control
 1. **AppLocker:** Deployed a whitelist policy to block untrusted binaries from vulnerable directories like `\Downloads` or `\Temp`, while allowing core UWP behaviors.
@@ -311,3 +311,20 @@ During the implementation of Group Policy, the following challenges were encount
 *   **Item-Level Targeting (ILT) Failures:** Network drives were failing to map for specific users despite correct group membership.
     *   **Resolution:** Diagnosed the issue using the GPO 'Settings' report to confirm that the security group was correctly scoped; ensured that 'Authenticated Users' had at least 'Read' access to the GPO to allow processing.
 
+## Conclusion
+
+This homelab project demonstrates the end-to-end engineering of a production-grade enterprise Windows environment, built entirely from scratch inside an isolated virtual network. Across three phases, the lab progressed from bare-metal hypervisor provisioning through network routing, automated identity lifecycle management, and centralized policy enforcement; mirroring the core infrastructure pillars found in real corporate IT environments.
+
+The skills exercised throughout this build include:
+
+| Domain | Demonstrated Competency |
+| :--- | :--- |
+| **Virtualization** | Oracle VirtualBox network topology, multi-VM orchestration |
+| **Networking** | RRAS NAT routing, DHCP scope engineering, DNS architecture |
+| **Identity Management** | AD DS, OU taxonomy, PowerShell-automated user provisioning |
+| **Security & Compliance** | GPO hardening, AppLocker whitelisting, RBAC group synchronization |
+| **Scripting** | Multi-stage PowerShell automation pipeline |
+
+Rather than simply following a tutorial, each phase was deliberately designed to simulate real-world enterprise decision-making; including troubleshooting network routing failures, resolving AppLocker compatibility conflicts, and engineering Item-Level Targeting logic for dynamic drive mapping.
+
+This environment serves as a living foundation, with future phases planned to incorporate SIEM log forwarding, attack simulation, defensive monitoring, and a hybrid identity architecture via Microsoft Entra Connect to bridge the on-premises Active Directory domain with Azure AD.
