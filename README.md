@@ -2,12 +2,110 @@
 
 ## Project Overview
 This project demonstrates the deployment, configuration, and security hardening of a corporate-grade Active Directory (AD) environment. Built inside an isolated virtual network, this lab simulates real-world enterprise infrastructure; spanning network routing, automated identity management, centralized policy distribution, and defensive endpoint engineering. 
+### Software Used
+* Oracle VirtualBox (Virtual Machine) 
+   * Other VM Software options include: VMWare Workstation Pro, Microsoft Hyper-V, ProxMox Virtual Environment, etc.
+* Windows Server 2022 Evaluation ISO
+* Windows 11 Enterprise EValuation ISO
+## Phase 0: Lab Environment Provisioning & Domain Bootstrap
+
+### 1. What Was Built
+A fully isolated virtualized lab environment built on Oracle VirtualBox, provisioned with a Windows Server 2022 Domain Controller and a Windows 11 Enterprise endpoint. This phase covers the foundational groundwork required before any network configuration, identity management, or policy enforcement can occur; from ISO acquisition through Active Directory installation and domain controller promotion.
+
+| Deliverable | Details |
+| :--- | :--- |
+| **Hypervisor** | Oracle VirtualBox installed on physical host machine |
+| **Server VM** | Windows Server 2022 Evaluation — provisioned and activated |
+| **Client VM** | Windows 11 Enterprise Evaluation — provisioned and activated |
+| **Active Directory** | AD DS role installed and configured on the Server VM |
+| **Domain** | Server promoted to Domain Controller for `myhomelab.local` |
+
+---
+
+### 2. Objective (Why)
+Before any enterprise security controls or network topology can be implemented, a stable virtualized foundation must exist. Active Directory Domain Services (AD DS) is the identity and authentication backbone of nearly every corporate Windows environment. Promoting a server to a Domain Controller establishes the authoritative root of the `myhomelab.local` domain, the single source of truth for all user accounts, group policies, and resource access enforced in subsequent phases.
+
+---
+
+### 3. Implementation (How)
+
+#### 📂 Step A: Hypervisor Installation
+1. Download and install **Oracle VirtualBox** from [virtualbox.org](https://www.virtualbox.org). Accept all default settings during installation.
+2. Optionally install the **VirtualBox Extension Pack** for enhanced VM compatibility and USB support.
+
+#### 📂 Step B: ISO Acquisition
+1. Download the **Windows Server 2022 Evaluation ISO** from Microsoft's Evaluation Center (180-day free license, no product key required).
+2. Download the **Windows 11 Enterprise Evaluation ISO** from Microsoft's Evaluation Center.
+3. Store both ISOs in an accessible local directory for VM attachment.
+
+#### 📂 Step C: Windows Server 2022 VM Provisioning
+1. In VirtualBox, click **New** and configure the VM with the following recommended baseline specs:
+
+| Setting | Recommended Value |
+| :--- | :--- |
+| Name | `DomainControllerWIN` |
+| Type / Version | Microsoft Windows / Windows 2022 (64-bit) |
+| RAM | 2048 MB (2 GB) minimum |
+| CPU Cores | 2 |
+| Storage | 50 GB dynamically allocated VDI |
+
+2. Under **Storage**, attach the **Windows Server 2022 ISO** to the optical drive controller.
+3. Boot the VM and proceed through the Windows Server installation wizard. Select **Windows Server 2022 Standard Evaluation (Desktop Experience)** for a GUI-based environment.
+4. Set a strong local Administrator password when prompted.
+
+#### 📂 Step D: Windows 11 Enterprise VM Provisioning
+1. In VirtualBox, click **New** and configure the client VM:
+
+| Setting | Recommended Value |
+| :--- | :--- |
+| Name | `Client01PC` |
+| Type / Version | Microsoft Windows / Windows 11 (64-bit) |
+| RAM | 4096 MB (4 GB) minimum |
+| CPU Cores | 2 |
+| Storage | 60 GB dynamically allocated VDI |
+
+2. Attach the **Windows 11 Enterprise ISO** to the optical drive and complete the installation. When prompted for a product key, select **I don't have a product key**.
+3. Complete OOBE (Out-of-Box Experience) setup. If the installer requires an internet connection, press `Shift + F10` to open a command prompt and run `OOBE\BYPASSNRO` to bypass the requirement.
+
+#### 📂 Step E: Active Directory Domain Services (AD DS) Installation
+1. On the **Windows Server 2022** VM, open **Server Manager**.
+2. Click **Add Roles and Features** and proceed through the wizard.
+3. Under **Server Roles**, select **Active Directory Domain Services**. Accept any additional feature dependencies when prompted.
+4. Complete the wizard and allow the installation to finish.
+
+#### 📂 Step F: Domain Controller Promotion
+1. In **Server Manager**, click the notification flag and select **Promote this server to a domain controller**.
+2. Select **Add a new forest** and set the Root domain name to `myhomelab.local`.
+3. Set the **Forest Functional Level** and **Domain Functional Level** to **Windows Server 2016** or higher.
+4. Set a **DSRM (Directory Services Restore Mode)** password and store it securely.
+5. Proceed through the wizard, accepting default paths for the NTDS database, SYSVOL, and log files.
+6. Allow the prerequisite check to complete, then click **Install**. The server will automatically reboot upon completion.
+7. After reboot, log in as `MYHOMELAB\Administrator`. The presence of the domain prefix confirms successful DC promotion.
+
+---
+
+### 4. Verification
+To confirm the domain environment is operational before proceeding:
+1. Open **Active Directory Users and Computers** (`dsa.msc`) on the Domain Controller and verify the `myhomelab.local` domain tree is present.
+2. Open **DNS Manager** and confirm that a forward lookup zone for `myhomelab.local` was automatically created during promotion.
+3. Run the following in an elevated PowerShell terminal to validate AD DS health:
+```powershell
+Get-ADDomain
+```
+A successful response returns the domain name, domain SID, and infrastructure details, confirming the directory is live and authoritative.
+
+| Component | Software/OS | Purpose |
+| :--- | :--- | :--- |
+| Hypervisor | Oracle VirtualBox | Lab Abstraction |
+| Server OS | Windows Server 2022 | DC & Identity Provider |
+| Client OS | Windows 11 | Endpoint Simulation |
+| Domain | myhomelab.local | Identity Namespace |
 
 ---
 
 ## Architectural Blueprint & Objectives
 * **Isolated Core Infrastructure:** Configured an enterprise network topology utilizing VirtualBox internal networks bridged securely via a Windows Server NAT gateway.
-* **Automated Identity Lifecycle:** Engineered and executed a custom PowerShell script to securely ingest and provision a multi-departmental corporate user directory.
+* **Automated Identity Lifecycle:** Engineered and executed custom PowerShell scripts to securely ingest and provision a multi-departmental corporate user directory.
 * **Centralized Domain Management:** Implemented consolidated Group Policy Objects (GPOs) leveraging Item-Level Targeting (ILT) for efficient departmental drive mapping.
 * **Defensive Endpoint Hardening:** Implemented application control via AppLocker policies to prevent untrusted binary execution and malicious software installation.
 ## Phase 1: Core Network Infrastructure & Routing
@@ -143,3 +241,73 @@ To ensure compliance with the Principle of Least Privilege, this script audits u
 # Run the RBAC syncing tool to automatically update security group memberships
 .\user-securitygroup-sync.ps1
 ```
+
+
+## Phase 3: Group Policy Management & Endpoint Security Hardening
+
+### 1. What Was Built
+A centralized policy management framework using **Group Policy Objects (GPO)** to enforce security standards, dynamic network drive mapping, software whitelisting, and administrative restrictions across the `myhomelab.local` domain.
+
+| Policy Category | Focus Area | Key Configuration Settings |
+| :--- | :--- | :--- |
+| **Security Baseline** | Password & Account | 10-char complexity, 30-min lockout after 3 failed attempts |
+| **Storage Policy** | Dynamic Mapping | Item-Level Targeting (ILT) based on security groups |
+| **AppLocker** | Software Whitelisting | Blocked executables in `\Downloads` and `\Temp` |
+| **Admin Restrictions**| System Access | Control Panel/Settings lockout for non-IT users |
+
+---
+
+### 2. Objective (Why)
+The goal of this phase was to transition from manual workstation configuration to **"Configuration as Code"** at the directory level. By leveraging GPOs, we ensure consistent security posture and environment settings for all users, automatically applied based on their departmental role and group membership.
+
+---
+
+### 3. Implementation (How)
+
+#### 📂 Step A: Domain Security Hardening
+Configured domain-wide account policies to enforce strict password complexity (minimum 10 characters) and lockout thresholds. This ensures a consistent security baseline across the entire domain.
+
+![Configured Default Domain Policies](assets/screenshots/default-domain-policies.png)
+
+#### 📂 Step B: Dynamic Network Storage Drive Mapping
+1. Architected a centralized `DriveMap-Departments` GPO to deliver unique storage nodes to departmental users.
+2. Created individual drive mappings (M, F, S, I, H) corresponding to the Finance, HR, IT, Marketing, and Sales departments.
+3. Utilized **Item-Level Targeting (ILT)** for each drive map to ensure security group membership (e.g., `GG-Finance Users`) is validated at login, ensuring users only receive access to their relevant departmental shares.
+
+![Drive Mapping Implementation](drive-maps.png)
+![Item Level Targeting Implementation](assets/screenshots/item-level-targeting.png)
+
+#### 📂 Step C: Endpoint Protection & Control
+1. **AppLocker:** Deployed a whitelist policy to block untrusted binaries from vulnerable directories like `\Downloads` or `\Temp`, while allowing core UWP behaviors.
+2. **Control Panel Lockout:** Applied an administrative restriction to the standard corporate OUs, preventing access to System Settings, while using security filtering to keep these capabilities available for the `IT Department`.
+
+#### *AppLocker Photo Documentation*
+![AppLocker Enforcement](assets/screenshots/applocker-enforcement.png)
+![Command Prompt Verification](<assets/screenshots/app-locker-policy in cmdprompt.png>)
+![Client Side Verification](assets/screenshots/applocker-blocking.png)
+#### *Control Panel Photo Documentation*
+![Control Panel Prohibition](assets/screenshots/control-panel-prohibition.png)
+![Control Panel Access](assets/screenshots/control-panel-access.png)
+![Blocked Control Panel](<assets/screenshots/blocked-control panel.png>)
+
+
+---
+
+### 4. Verification & Testing
+To confirm the policies are active:
+1. Open the command prompt on the client workstation and run `gpupdate /force`.
+2. Execute `gpresult /r` to generate a report confirming the target GPOs have been successfully applied to the user or machine.
+
+> **📸 Recommended Screenshot:** Capture the terminal output of `gpresult /r` demonstrating that your new security policies appear under the "Applied Group Policy Objects" list.
+---
+
+### 5. Troubleshooting & Challenges
+During the implementation of Group Policy, the following challenges were encountered and resolved:
+
+*   **Policy Propagation Delay:** Policies were not immediately reflecting on the client workstation after creation. 
+    *   **Resolution:** Forced a synchronization refresh by running `gpupdate /force` on the endpoint and ensuring the domain controller had successfully replicated the SYSVOL folder changes.
+*   **AppLocker Compatibility:** Initial enforcement of AppLocker rules inadvertently blocked critical UWP components, resulting in a non-functional Start Menu.
+    *   **Resolution:** Injected "Packaged App Rules" into the default policy database to whitelist essential Windows system binaries while maintaining the restriction on external downloads.
+*   **Item-Level Targeting (ILT) Failures:** Network drives were failing to map for specific users despite correct group membership.
+    *   **Resolution:** Diagnosed the issue using the GPO 'Settings' report to confirm that the security group was correctly scoped; ensured that 'Authenticated Users' had at least 'Read' access to the GPO to allow processing.
+
