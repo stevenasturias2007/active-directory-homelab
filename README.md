@@ -298,7 +298,6 @@ To confirm the policies are active:
 1. Open the command prompt on the client workstation and run `gpupdate /force`.
 2. Execute `gpresult /r` to generate a report confirming the target GPOs have been successfully applied to the user or machine.
 
-> **📸 Recommended Screenshot:** Capture the terminal output of `gpresult /r` demonstrating that your new security policies appear under the "Applied Group Policy Objects" list.
 ---
 
 ### 5. Troubleshooting & Challenges
