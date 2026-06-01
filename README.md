@@ -282,9 +282,9 @@ Configured domain-wide account policies to enforce strict password complexity (m
 2. **Control Panel Lockout:** Applied an administrative restriction to the standard corporate OUs, preventing access to System Settings, while using security filtering to keep these capabilities available for the `IT Department`.
 
 #### *AppLocker Photo Documentation*
-![AppLocker Enforcement](assets/screenshots/applocker-enforcement.png)
-![Command Prompt Verification](<assets/screenshots/app-locker-policy in cmdprompt.png>)
-![Client Side Verification](assets/screenshots/applocker-blocking.png)
+![App Locker Policy](<assets/screenshots/app-locker-policy in cmdprompt.png>)
+![App Locker Enforce](assets/screenshots/applocker-enforcement.png)
+![App Locker Block](assets/screenshots/applocker-blocking.png)
 #### *Control Panel Photo Documentation*
 ![Control Panel Prohibition](assets/screenshots/control-panel-prohibition.png)
 ![Control Panel Access](assets/screenshots/control-panel-access.png)
